@@ -41,12 +41,9 @@ class acf_field_post_title_search
 	*  @created: 5/23/2016
 	*/
 
-	function init()
+	function include_field_types()
 	{
-		if(function_exists('register_field'))
-		{
-			register_field('acf_field_post_title_search', dirname(__File__) . '/post_title_search.php');
-		}
+		include_once('post_title_search.php');
 	}
 
 }
