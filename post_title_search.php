@@ -54,6 +54,12 @@ class acf_field_post_title extends acf_field {
 	}
 
 
+	private function input_admin_enqueue_scripts()
+	{
+		wp_enqueue_script( 'acf-post-title-search-scripts', $this->dir . 'js/input.js', array('acf-input'), $this->version, true );
+	}
+
+
 	/*
 	*  get_choices
 	*
