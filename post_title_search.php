@@ -30,6 +30,9 @@ class acf_field_post_title extends acf_field {
 	function __construct() {
 
 		// vars
+		$this->version = "0.0.1";
+		$this->dir = plugin_dir_url( __FILE__ );
+		$this->path = plugin_dir_path(__FILE__);
 		$this->name = 'post_title';
 		$this->label = __("Post Title Search",'acf');
 		$this->category = 'relational';
