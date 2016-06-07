@@ -1,8 +1,12 @@
 <?php
 
 /*
- * ACF Post Title Field Class Searches just the post_title for a substring.
- * @class acf_field_post_title @extends acf_field
+ * ACF Post Title Field Class
+ *
+ * Searches just the post_title for a substring.
+ *
+ * @class acf_field_post_title
+ * @extends acf_field
  */
 if (!class_exists('acf_field_post_title')) :
 
@@ -13,14 +17,21 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * __construct This function will setup the field type data @type
-         * function @date 5/23/2016 @since 0.0.1 @param n/a @return n/a
+         * __construct
+         *
+         * This function will setup the field type data
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param n/a
+         * @return n/a
          */
         function __construct()
         {
 
             // vars
-            $this->version = "0.0.2";
+            $this->version = "1.0.0";
             $this->dir = plugin_dir_url(__FILE__);
             $this->path = plugin_dir_path(__FILE__);
             $this->name = 'post_title';
@@ -36,18 +47,9 @@ if (!class_exists('acf_field_post_title')) :
             );
 
             // extra
-            add_action('wp_ajax_acf/fields/post_title/query', array(
-                $this,
-                'ajax_query'
-            ));
-            add_action('wp_ajax_nopriv_acf/fields/post_title/query', array(
-                $this,
-                'ajax_query'
-            ));
-            add_action('wp_enqueue_scripts', array(
-                $this,
-                'input_admin_enqueue_scripts'
-            ));
+            add_action('wp_ajax_acf/fields/post_title/query', array($this, 'ajax_query'));
+            add_action('wp_ajax_nopriv_acf/fields/post_title/query', array($this, 'ajax_query'));
+            add_action('wp_enqueue_scripts', array($this, 'input_admin_enqueue_scripts'));
 
             // filter to search posts by post_title
             add_filter('posts_clauses', array($this, 'title_like_posts_clauses'), 11, 2);
@@ -58,6 +60,17 @@ if (!class_exists('acf_field_post_title')) :
         }
 
 
+        /*
+         * input_admin_enqueue_scripts
+         *
+         * This function will load the required JavaScript library.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param n/a
+         * @return n/a
+         */
         function input_admin_enqueue_scripts()
         {
             wp_enqueue_script('acf-post-title-search-scripts', $this->dir . 'js/input.js', array(
@@ -66,9 +79,18 @@ if (!class_exists('acf_field_post_title')) :
         }
 
 
-        /**
-         * if 'post_title_like' is set in the wp_query args, then perform a
-         * like search for that value in the post_title
+        /*
+         * title_like_posts_clauses
+         *
+         * This function adds some customizations to the query
+         * that performs the full text search of the post_title field.
+         *
+         * @type function
+         * @date 6/6/2016
+         * @since 0.0.2
+         * @param $clauses - associative array of SQL construction clasues.
+         * @param $wp_query - Core WPQuery object.
+         * @return $clauses - associative array.
          */
         function title_like_posts_clauses($clauses, &$wp_query)
         {
@@ -76,16 +98,25 @@ if (!class_exists('acf_field_post_title')) :
             if ($post_title_like = $wp_query->get('post_title_like')) {
                 $clauses["fields"] .= ', MATCH(' . $wpdb->posts . '.post_title) AGAINST(\'' . esc_sql($wpdb->esc_like($post_title_like)) . '\') AS score';
                 $clauses["orderby"] = "MATCH(" . $wpdb->posts . ".post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') DESC";
-                $clauses["where"] = " AND sz_posts.post_type IN ('post', 'ext', 'cartoon', 'press', 'reports', 'event') AND sz_posts.post_status = 'publish' AND MATCH(sz_posts.post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') > 1";
+                $clauses["where"] .= " AND MATCH(sz_posts.post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') > 1";
             }
 
             return $clauses;
         }
 
 
-        /**
-         * if 'post_title_like' is set in the wp_query args, then perform a
-         * like search for that value in the post_title
+        /*
+         * title_like_posts_request
+         *
+         * This function will load print out the query about
+         * to be run.  Used to debug the actual SQL to be sent to the database. Leaving
+         * this function hooked will cause your ACF field to not update properly.
+         *
+         * @type function
+         * @date 6/6/2016
+         * @since 0.0.2
+         * @param n/a
+         * @return n/a
          */
         function title_like_posts_request($request, &$wp_query)
         {
@@ -97,9 +128,16 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * get_choices This function will return an array of data formatted
-         * for use in a select2 AJAX response @type function @date 5/23/2016
-         * @since 0.0.1 @param $options (array) @return (array)
+         * get_choices
+         *
+         * This function will return an array of data formatted
+         * for use in a select2 AJAX response.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $options - associative array of options are provided by the user.
+         * @return array of matching post objects.
          */
         function get_choices($options = array())
         {
@@ -205,8 +243,16 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * ajax_query description @type function @date 5/23/2016 @since 0.0.1
-         * @return List of choices
+         * ajax_query
+         *
+         * This function is the entry point for the user
+         * request.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param n/a
+         * @return n/a
          */
         function ajax_query()
         {
@@ -228,10 +274,17 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * get_post_title This function returns the HTML for a result @type
-         * function @date 5/23/2016 @since 0.0.1 @param $post (object) @param
-         * $field (array) @param $post_id (int) the post_id to which this
-         * value is saved to @return (string)
+         * get_post_title
+         *
+         * This function will return the post_title string formatted for display.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $post - WP Post object
+         * @param $field - ACF Field object
+         * @param $post_id - The ID of the WP Post object.
+         * @return Formatted post title string.
          */
         function get_post_title($post, $field, $post_id = 0)
         {
@@ -253,9 +306,16 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * render_field() Create the HTML interface for your field @param
-         * $field - an array holding all the field's data @type action @since
-         * 0.0.1 @date 5/23/2016
+         * render_field
+         *
+         * This function will create the HTML interface for the post_title field
+         * based on the ACF field definition
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $field - Associative array pulled from ACF field defintion
+         * @return n/a
          */
         function render_field($field)
         {
@@ -291,11 +351,17 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * render_field_settings() Create extra options for your field. This
-         * is rendered when editing a field. The value of $field['name'] can
-         * be used (like bellow) to save extra data to the $field @type action
-         * @since 0.0.1 @date 5/23/2016 @param $field - an array holding all
-         * the field's data
+         * render_field_settings
+         *
+         * This function adds additional options to the post_title ACF field.  These
+         * settings definitions were mostly cribbed from the default post_object
+         * ACF field.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $field - ACF Field object.
+         * @return n/a
          */
         function render_field_settings($field)
         {
@@ -368,12 +434,18 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * load_value() This filter is applied to the $value after it is
-         * loaded from the db @type filter @since 0.0.1 @date 5/23/2016 @param
-         * $value (mixed) the value found in the database @param $post_id
-         * (mixed) the $post_id from which the value was loaded @param $field
-         * (array) the field array holding all the field options @return
-         * $value
+         * load_value
+         *
+         * This filter to will clean up values as provided by the database prior to
+         * use by the rest of the plugin.
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $value - Value as received from the DB
+         * @param $post_id - The ID of the post from which the value was loaded
+         * @param $field - ACF Field object
+         * @return newly mangled/cleansed value
          */
         function load_value($value, $post_id, $field)
         {
@@ -384,13 +456,15 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * format_value() This filter is appied to the $value after it is
-         * loaded from the db and before it is returned to the template @type
-         * filter @since 0.0.1 @date 5/23/2016 @param $value (mixed) the value
-         * which was loaded from the database @param $post_id (mixed) the
-         * $post_id from which the value was loaded @param $field (array) the
-         * field array holding all the field options @return $value (mixed)
-         * the modified value
+         * format_value
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $value - Value as received from the DB
+         * @param $post_id - The ID of the post from which the value was loaded
+         * @param $field - ACF Field object
+         * @return Formatted value
          */
         function format_value($value, $post_id, $field)
         {
@@ -421,12 +495,15 @@ if (!class_exists('acf_field_post_title')) :
 
 
         /*
-         * update_value() This filter is appied to the $value before it is
-         * updated in the db @type filter @since 0.0.1 @date 5/23/2016 @param
-         * $value - the value which will be saved in the database @param
-         * $post_id - the $post_id of which the value will be saved @param
-         * $field - the field array holding all the field options @return
-         * $value - the modified value
+         * update_value
+         *
+         * @type function
+         * @date 5/23/2016
+         * @since 0.0.1
+         * @param $value - Value as received from the DB
+         * @param $post_id - The ID of the post from which the value was loaded
+         * @param $field - ACF Field object
+         * @return Cleansed/updated value
          */
         function update_value($value, $post_id, $field)
         {
