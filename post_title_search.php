@@ -98,7 +98,7 @@ if (!class_exists('acf_field_post_title')) :
             if ($post_title_like = $wp_query->get('post_title_like')) {
                 $clauses["fields"] .= ', MATCH(' . $wpdb->posts . '.post_title) AGAINST(\'' . esc_sql($wpdb->esc_like($post_title_like)) . '\') AS score';
                 $clauses["orderby"] = "MATCH(" . $wpdb->posts . ".post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') DESC";
-                $clauses["where"] .= " AND MATCH(sz_posts.post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') > 1";
+                $clauses["where"] .= " AND MATCH(" . $wpdb->posts . ".post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') > 1";
             }
 
             return $clauses;
