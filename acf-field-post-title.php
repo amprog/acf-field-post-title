@@ -3,7 +3,7 @@
 Plugin Name: Advanced Custom Fields: Post Title Search
 Plugin URI: https://github.com/amprog/acf-field-post-title
 Description: Post Title Search for ACF
-Version: 1.0.0
+Version: 1.0.2
 Author: Eric Helvey
 Author URI: http://github.com/helver
 License: GPLv2 or later
