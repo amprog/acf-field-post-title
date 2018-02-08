@@ -95,9 +95,13 @@ if (!class_exists('acf_field_post_title')) :
         function title_like_posts_clauses($clauses, &$wp_query)
         {
             global $wpdb;
+
             if ($post_title_like = $wp_query->get('post_title_like')) {
+                // add + before all the search terms to provide AND behavior
+                $post_title_like = preg_replace('/(^|\s)/', ' +', $post_title_like);
+
                 $clauses["fields"] .= ', MATCH(' . $wpdb->posts . '.post_title) AGAINST(\'' . esc_sql($wpdb->esc_like($post_title_like)) . '\') AS score';
-                $clauses["orderby"] = "MATCH(" . $wpdb->posts . ".post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') DESC";
+                $clauses["orderby"] = "score DESC, post_modified_gmt DESC";
                 $clauses["where"] .= " AND MATCH(" . $wpdb->posts . ".post_title) AGAINST('" . esc_sql($wpdb->esc_like($post_title_like)) . "') > 1";
             }
 
